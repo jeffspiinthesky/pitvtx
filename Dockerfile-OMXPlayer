@@ -1,0 +1,13 @@
+ARG REPOSITORY
+FROM ${REPOSITORY}jeffspiinthesky/ffmpeg:5.1.3 as builder
+
+# Install OMXPlayer
+USER root
+RUN apt-get install -y omxplayer
+
+# Update LD cache
+RUN ldconfig 
+
+USER pi
+WORKDIR /home/pi
+

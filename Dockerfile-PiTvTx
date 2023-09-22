@@ -1,0 +1,14 @@
+ARG REPOSITORY
+FROM ${REPOSITORY}jeffspiinthesky/srt-ffmpeg-omxplayer:1.5.3_5.1.3_f543a0d
+
+USER root
+RUN apt install -y netcat
+
+ADD client.sh /usr/local/bin/client.sh
+ADD server.sh /usr/local/bin/server.sh
+ADD run.sh /usr/local/bin/run.sh
+
+RUN chmod +x /usr/local/bin/*.sh
+
+USER root
+ENTRYPOINT [ "/usr/local/bin/run.sh" ]

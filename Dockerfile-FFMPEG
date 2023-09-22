@@ -1,0 +1,55 @@
+ARG REPOSITORY
+FROM ${REPOSITORY}jeffspiinthesky/srt:1.5.3 as builder
+
+# set up a source area
+USER pi
+WORKDIR /home/pi
+RUN mkdir -p /home/pi/src
+
+WORKDIR /home/pi/src
+# Pull sources
+RUN git clone https://github.com/raspberrypi/userland.git userland
+RUN git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg
+
+# Update LD path
+USER root
+ADD ffmpeg-srt.conf /etc/ld.so.conf.d/ffmpeg-srt.conf
+RUN ldconfig
+
+# Install Userland (MMAL etc)
+USER pi
+WORKDIR /home/pi/src/userland
+RUN ./buildme
+
+# Update LD path
+USER root
+WORKDIR /home/pi/src/userland/build/raspberry/release
+RUN make install
+RUN echo "/opt/vc/lib" > /etc/ld.so.conf.d/userland.conf
+RUN ldconfig
+
+# Make FFMPEG
+USER pi
+WORKDIR /home/pi/src/ffmpeg
+RUN git checkout tags/n5.1.3
+RUN ./configure --arch=arm --enable-bzlib --enable-ladspa --enable-libass --enable-libdc1394 --enable-nonfree --enable-nonfree --disable-indev=jack --enable-libfreetype --enable-libgsm --enable-libmp3lame --enable-openal --enable-libopenjpeg --enable-libpulse --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libx265 --enable-libxvid --enable-avfilter --enable-postproc --enable-pthreads --enable-static --disable-shared --enable-gpl --disable-debug --disable-stripping --shlibdir=/usr/lib64 --enable-runtime-cpudetect --enable-libvpx --enable-libsrt --enable-alsa --enable-mmal --enable-omx --enable-omx-rpi --extra-ldflags="-latomic"
+RUN make -j
+
+# Install FFMPEG
+USER root
+WORKDIR /home/pi/src/ffmpeg
+RUN make install
+
+USER root
+RUN ldconfig
+
+# Clean up
+USER pi
+WORKDIR /home/pi
+RUN rm -rf src
+
+USER root
+RUN apt-get remove -y build-essential libfontconfig1-dev libfribidi-dev libglib2.0-dev libglib2.0-dev-bin libgraphite2-dev libharfbuzz-dev libicu-dev libmount-dev libpcre3-dev libselinux1-dev libsepol1-dev libdc1394-22-dev libraw1394-dev libgsm1-dev libmp3lame-dev libopenjpeg-dev libopenjp2-7-dev libpulse-dev libsoxr-dev libspeex-dev libogg-dev libtheora-dev libvorbis-dev libvpx-dev libx264-dev libx265-dev libxvidcore-dev libopenal-dev libbz2-dev libasound-dev libssl-dev cmake git 
+
+FROM ${REPOSITORY}jeffspiinthesky/srt:1.5.3
+COPY --from=builder / /
