@@ -15,6 +15,8 @@ while [ 1==1 ]
 do 
 	RESP=$(echo "${PORT}|${PWD}" | nc -vq 1 ${HOST} ${CTRL})
 echo "${RESP}"
-	(ffmpeg -hide_banner -loglevel info -copyts -f mpegts -re -i "srt://${HOST}:${PORT}?password=${PWD}" -map 0:v -c:v copy -map 0:a -c:a copy -f mpegts -flags low_delay pipe:1 > /tmp/fifo)& /usr/bin/omxplayer.bin -o hdmi --adev hdmi --live /tmp/fifo
+	(srt-live-transmit "srt://${HOST}:${PORT}?password=${PWD}" file://con > /tmp/fifo)& \
+        /usr/bin/omxplayer.bin -o hdmi --adev hdmi --live /tmp/fifo && \
+        echo "raspberry" | sudo kill -9 $(ps -ef | grep srt-live-transmit | grep -v grep | awk '{print $2}')
 	sleep 5
 done
