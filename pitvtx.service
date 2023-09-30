@@ -1,0 +1,12 @@
+[Unit]
+Description=PI TV Transmitter
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker-compose -f /usr/local/bin/pitvtx.compose up
+ExecStop=/usr/bin/docker-compose -f /usr/local/bin/pitvtx.compose down
+
+[Install]
+WantedBy=default.target

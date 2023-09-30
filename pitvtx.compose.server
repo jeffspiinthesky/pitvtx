@@ -1,0 +1,17 @@
+version: "3"
+services:
+  pitvtx:
+    image: jeffspiinthesky/pitvtx:1.0.0
+    container_name: "pitvtx"
+    ports: 
+      - 9000:9000/tcp
+      - 9001:9001/udp
+    environment:
+      - SVR_CTRL_PORT=9000
+      - AUDIO_DEVICE=hw:3,0
+      - VIDEO_DEVICE=video0
+      - RUN_MODE=server
+    devices:
+      - /dev/vchiq:/dev/vchiq
+      - /dev/snd:/dev/snd
+      - /dev/video0:/dev/video0

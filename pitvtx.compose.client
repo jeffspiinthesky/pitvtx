@@ -1,0 +1,13 @@
+version: "3"
+services:
+  pitvtx:
+    image: jeffspiinthesky/pitvtx:1.0.0
+    container_name: "pitvtx"
+    environment:
+      - SVR_HOST=jpits-498b2.ddns.net
+      - SVR_CTRL_PORT=9000
+      - SVR_VID_PORT=9001
+      - RUN_MODE=client
+    devices:
+      - /dev/vchiq:/dev/vchiq
+      - /dev/snd:/dev/snd
